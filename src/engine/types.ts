@@ -59,6 +59,11 @@ export interface CarModel {
   legendary: boolean;
   salesByRegion: Partial<Record<RegionId, number>>;
   quartersInProduction: number;
+  // Optional so saves from before the sales report still load.
+  devCost?: number; // development spend, included in `profit`
+  revenueLastQuarter?: number;
+  profitLastQuarter?: number; // revenue minus build costs, last quarter
+  salesHistory?: number[]; // units per quarter, oldest first, last 12 quarters
 }
 
 export interface Driver {
@@ -170,6 +175,7 @@ export interface QuarterReport {
   prizeMoney: number;
   brandIncome: number;
   unitsSold: number;
+  demand?: number; // cars buyers wanted, before factory capacity
   profit: number;
 }
 

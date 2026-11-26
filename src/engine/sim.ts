@@ -460,7 +460,7 @@ export function startDesign(state: GameState, d: DesignDraft): GameState {
     status: 'development', devQuartersLeft: nums.devQuarters, launchedAt: null, unitsSold: 0, unitsLastQuarter: 0,
     revenue: 0, profit: -nums.devCost,
     lineReputation: prev ? Math.max(prev.lineReputation * 0.5, prev.reputation) : 0,
-    reputation: 0, legendary: false, salesByRegion: {}, quartersInProduction: 0,
+    reputation: 0, legendary: false, salesByRegion: {}, quartersInProduction: 0, devCost: nums.devCost,
   };
   s.cars.push(car);
   addNews(s, `Development begins on the ${carTitle(car)}.`, 'neutral');
@@ -1060,6 +1060,9 @@ export function advanceQuarter(state: GameState): GameState {
     const cost = units * car.unitCost;
     car.unitsSold += units;
     car.unitsLastQuarter = units;
+    car.revenueLastQuarter = revenue;
+    car.profitLastQuarter = revenue - cost;
+    car.salesHistory = [...(car.salesHistory ?? []), units].slice(-12);
     car.revenue += revenue;
     car.profit += revenue - cost;
     car.quartersInProduction++;
@@ -1098,6 +1101,7 @@ export function advanceQuarter(state: GameState): GameState {
   }
   addPrestige(s, clamp(productPrestige, -0.5, 0.3));
   report.unitsSold = unitsTotal;
+  report.demand = Math.round(totalDemand);
   s.money += report.revenue - report.carCosts;
   if (fill < 0.98 && active.length) {
     if (rng.next() < 0.35) addNews(s, `Waiting lists grow: demand is ${Math.round(totalDemand).toLocaleString()} cars but the factory makes ${cap.toLocaleString()}.`, 'neutral');
@@ -1196,7 +1200,8 @@ export function money(v: number) {
 
 /** Exact dollar amount, for prices. */
 export function price(v: number) {
-  return v >= 1e6 ? money(v) : `$${Math.round(v).toLocaleString('en-US')}`;
+  if (Math.abs(v) >= 1e6) return money(v);
+  return `${v < 0 ? '-' : ''}$${Math.abs(Math.round(v)).toLocaleString('en-US')}`;
 }
 
 export function marketShareSummary(s: GameState) {
