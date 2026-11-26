@@ -7,6 +7,7 @@ import {
 } from '../engine/sim';
 import type { Driver } from '../engine/types';
 import { useActiveGame } from '../state/GameContext';
+import RaceViewer from './RaceViewer';
 import { Bar, Between, Button, C, Card, Pill, Row, Screen, Section, Segmented, Sheet, Stat, font } from '../ui/kit';
 
 export default function RacingScreen() {
@@ -141,6 +142,8 @@ function SeasonCard() {
   const myPos = table.findIndex((e) => e.isPlayer);
   const shown = table.filter((_, i) => i < 5 || i === myPos);
   const lastRaces = season.results.slice(-4).reverse();
+  const [watching, setWatching] = useState<number | null>(null);
+  const watchRace = watching !== null ? season.results.find((r) => r.round === watching) : undefined;
   return (
     <Section title={`${season.year} ${tier.name}`} right={<Pill label={`ROUND ${season.roundsDone}/${season.totalRounds}`} color={C.amber} />}>
       <Card>
@@ -159,19 +162,22 @@ function SeasonCard() {
           );
         })}
         {lastRaces.length > 0 && (
-          <View style={{ gap: 4, borderTopWidth: 1, borderTopColor: C.line, paddingTop: 8 }}>
+          <View style={{ gap: 2, borderTopWidth: 1, borderTopColor: C.line, paddingTop: 8 }}>
+            <Button small kind="primary" label={`▶ Watch the latest race: ${lastRaces[0].name}`} onPress={() => setWatching(lastRaces[0].round)} />
             {lastRaces.map((rr) => {
               const p = rr.order.indexOf('player');
               return (
-                <Between key={rr.round}>
-                  <Text style={font.small}>R{rr.round} {rr.name}{rr.wet ? ' 🌧️' : ''}</Text>
+                <Pressable key={rr.round} onPress={() => setWatching(rr.round)} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, opacity: pressed ? 0.6 : 1 })}>
+                  <Text style={[font.small, { flex: 1 }]}>R{rr.round} {rr.name}{rr.wet ? ' 🌧️' : ''}</Text>
                   <Text style={{ color: p === 0 ? C.gold : p > 0 && p < 3 ? C.green : p < 0 ? '#FF6B6B' : C.text, fontWeight: '800' }}>{p < 0 ? 'DNF' : `P${p + 1}`}</Text>
-                </Between>
+                  <Text style={{ color: C.blue, fontWeight: '700', fontSize: 13 }}>▶ Watch</Text>
+                </Pressable>
               );
             })}
           </View>
         )}
       </Card>
+      {watchRace && <RaceViewer s={s} race={watchRace} onClose={() => setWatching(null)} />}
     </Section>
   );
 }
