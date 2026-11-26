@@ -15,6 +15,11 @@ interface Ctx {
   toast: string | null;
   showToast: (msg: string) => void;
   resetGame: () => void;
+  /** Latest game state, for timers that must not read a stale render. */
+  getGame: () => GameState | null;
+  /** Number of open sheets (car designer, driver market...). The quarter clock pauses while > 0. */
+  openSheets: number;
+  holdClock: (delta: 1 | -1) => void;
 }
 
 const GameCtx = createContext<Ctx | null>(null);
@@ -25,6 +30,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameRef = useRef<GameState | null>(null);
+  const [openSheets, setOpenSheets] = useState(0);
+  const holdClock = useCallback((delta: 1 | -1) => setOpenSheets((n) => Math.max(0, n + delta)), []);
+  const getGame = useCallback(() => gameRef.current, []);
 
   useEffect(() => {
     (async () => {
@@ -84,7 +92,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const resetGame = useCallback(() => setGame(null), [setGame]);
 
   return (
-    <GameCtx.Provider value={{ game, loaded, act, setGame, toast, showToast, resetGame }}>{children}</GameCtx.Provider>
+    <GameCtx.Provider value={{ game, loaded, act, setGame, toast, showToast, resetGame, getGame, openSheets, holdClock }}>{children}</GameCtx.Provider>
   );
 }
 

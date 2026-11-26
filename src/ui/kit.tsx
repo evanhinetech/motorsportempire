@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useGame } from '../state/GameContext';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextStyle, View, ViewStyle, LayoutChangeEvent } from 'react-native';
 
 export const C = {
@@ -171,6 +172,13 @@ export function Chip({ label, on, onPress, disabled }: { label: string; on?: boo
 }
 
 export function Sheet({ visible, onClose, title, children }: { visible: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
+  // Any open sheet pauses the quarter clock.
+  const { holdClock } = useGame();
+  useEffect(() => {
+    if (!visible) return;
+    holdClock(1);
+    return () => holdClock(-1);
+  }, [visible, holdClock]);
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.sheetBackdrop}>

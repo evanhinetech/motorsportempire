@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { advanceQuarter, dateLabel, money } from './src/engine/sim';
 import type { GameState } from './src/engine/types';
@@ -46,17 +46,53 @@ function Root() {
   );
 }
 
+const QUARTER_MS = 10_000;
+
 function Shell() {
-  const { game, setGame, resetGame } = useGame();
+  const { game, setGame, resetGame, getGame, openSheets } = useGame();
   const s = game!;
   const [tab, setTab] = useState<Tab>('hq');
   const [summary, setSummary] = useState<{ before: GameState; after: GameState } | null>(null);
+  const [recap, setRecap] = useState<{ before: GameState; after: GameState } | null>(null);
+  // The clock starts paused whenever the app opens, so nothing happens before you're ready.
+  const [paused, setPaused] = useState(true);
+  const [elapsed, setElapsed] = useState(0);
 
-  const endQuarter = () => {
-    const after = advanceQuarter(s);
+  const running = !paused && openSheets === 0 && !s.gameOver;
+
+  useEffect(() => {
+    if (!running) return;
+    let last = Date.now();
+    const id = setInterval(() => {
+      const now = Date.now();
+      const dt = now - last;
+      last = now;
+      setElapsed((e) => e + dt);
+    }, 100);
+    return () => clearInterval(id);
+  }, [running]);
+
+  useEffect(() => {
+    if (elapsed < QUARTER_MS) return;
+    setElapsed(0);
+    const before = getGame();
+    if (!before || before.gameOver) return;
+    const after = advanceQuarter(before);
     setGame(after);
-    setSummary({ before: s, after });
-  };
+    setRecap({ before, after });
+    if (after.gameOver) setSummary({ before, after });
+  }, [elapsed, getGame, setGame]);
+
+  // the small results banner fades after a few seconds
+  useEffect(() => {
+    if (!recap) return;
+    const id = setTimeout(() => setRecap(null), 4000);
+    return () => clearTimeout(id);
+  }, [recap]);
+
+  const left = Math.max(0, Math.ceil((QUARTER_MS - elapsed) / 1000));
+  const pct = Math.min(1, elapsed / QUARTER_MS);
+  const status = s.gameOver ? 'Bankrupt' : paused ? 'Paused' : openSheets > 0 ? 'Paused while this is open' : `${dateLabel(s.quarter)} ends in ${left}s`;
 
   return (
     <View style={{ flex: 1 }}>
@@ -69,11 +105,38 @@ function Shell() {
         {tab === 'empire' && <EmpireScreen />}
       </View>
 
-      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 72 + BOTTOM_INSET }}>
+      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 72 + BOTTOM_INSET, gap: 8 }}>
+        {recap && !s.gameOver && (
+          <Pressable onPress={() => { setSummary(recap); setRecap(null); }} style={{ backgroundColor: C.panel2, borderColor: C.line, borderWidth: 1, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14 }}>
+            <Between>
+              <Text style={{ color: C.text, fontWeight: '700' }}>{dateLabel(recap.before.quarter)} done · {recap.after.reports[0].unitsSold.toLocaleString()} cars sold</Text>
+              <Text style={[font.num, { color: recap.after.reports[0].profit >= 0 ? C.green : '#FF6B6B' }]}>{money(recap.after.reports[0].profit)}</Text>
+            </Between>
+            <Text style={[font.small, { fontSize: 11 }]}>Tap for details</Text>
+          </Pressable>
+        )}
         {s.gameOver ? (
           <Button kind="primary" label="Bankrupt · Start a new company" onPress={resetGame} />
         ) : (
-          <Button kind="primary" label={`End ${dateLabel(s.quarter)} ▸`} onPress={endQuarter} style={{ shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 12, elevation: 8 }} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: C.panel, borderColor: C.line, borderWidth: 1, borderRadius: 12, padding: 8, shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 12, elevation: 8 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={paused ? 'Start the clock' : 'Pause the clock'}
+              onPress={() => setPaused((p) => !p)}
+              style={({ pressed }) => ({ width: 46, height: 46, borderRadius: 10, backgroundColor: paused ? C.red : C.panel2, alignItems: 'center', justifyContent: 'center', opacity: pressed ? 0.75 : 1 })}
+            >
+              <Text style={{ color: C.text, fontSize: 18, fontWeight: '900' }}>{paused ? '▶' : '❚❚'}</Text>
+            </Pressable>
+            <View style={{ flex: 1, gap: 6 }}>
+              <Between>
+                <Text style={{ color: C.text, fontWeight: '800' }}>{status}</Text>
+                {paused && s.quarter === 0 && <Text style={[font.small, { fontSize: 12 }]}>Tap ▶ to start</Text>}
+              </Between>
+              <View style={{ height: 6, borderRadius: 3, backgroundColor: C.line, overflow: 'hidden' }}>
+                <View style={{ width: `${pct * 100}%`, height: 6, backgroundColor: running ? C.red : C.faint }} />
+              </View>
+            </View>
+          </View>
         )}
       </View>
 

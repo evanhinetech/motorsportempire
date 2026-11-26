@@ -20,7 +20,7 @@ export default function HQScreen({ go }: { go: (t: Tab) => void }) {
     { done: s.cars.length > 0, text: 'Design your first road car', tab: 'cars' },
     { done: s.racing.pendingTier !== null || s.racing.tier !== null, text: 'Pick a motorsport series', tab: 'racing' },
     { done: !!driver, text: 'Sign a racing driver', tab: 'racing' },
-    { done: s.quarter > 0, text: 'Tap "End Quarter" to run the business', tab: 'hq' },
+    { done: s.quarter > 0, text: 'Tap ▶ at the bottom to start the clock', tab: 'hq' },
   ];
   const showSteps = steps.some((x) => !x.done) && s.quarter < 8;
 
