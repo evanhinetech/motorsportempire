@@ -40,7 +40,7 @@ drivers, sponsors, supercars, higher racing tiers and acquisitions.
 ## Project layout
 
 ```
-App.tsx                     app shell: top bar, tabs, End Quarter, quarter summary
+App.tsx                     app shell: top bar, tabs, 10-second quarter clock, quarter summary
 src/engine/types.ts         game state types
 src/engine/data.ts          all tunable content: segments, regions, tiers, factories, names
 src/engine/sim.ts           the simulation: market model, actions, quarter loop (pure TS, no React)
