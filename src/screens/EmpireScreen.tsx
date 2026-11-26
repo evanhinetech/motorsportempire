@@ -6,6 +6,7 @@ import {
   regionStatus, repayLoan, setMarketing, upgradeFactory,
 } from '../engine/sim';
 import { useActiveGame } from '../state/GameContext';
+import { SalesSection } from './SalesReport';
 import { Bar, Between, Button, C, Card, Pill, Row, Screen, Section, Segmented, Stat, font } from '../ui/kit';
 
 export default function EmpireScreen() {
@@ -27,6 +28,8 @@ export default function EmpireScreen() {
         </Between>
         {owned.length > 0 && <Text style={{ color: C.gold, fontWeight: '700' }}>Group brands: {owned.map((r) => r.name).join(', ')}</Text>}
       </Card>
+
+      <SalesSection s={s} />
 
       <Section title="Manufacturing">
         <Card>

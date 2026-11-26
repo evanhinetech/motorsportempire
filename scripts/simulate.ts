@@ -8,6 +8,8 @@ const years = Number(process.argv[2] ?? 40);
 const seed = Number(process.argv[3] ?? 7);
 const philosophy = (process.argv[4] ?? 'performance') as Philosophy;
 const quiet = process.argv.includes('--quiet');
+// --save=FILE writes the final game state as JSON (handy for loading a mid-game save in the app)
+const saveArg = process.argv.find((a: string) => a.startsWith('--save='));
 
 let s = E.newGame({ name: 'Bot Motors', logo: '🦅', color: '#E10600', philosophy, country: 'United Kingdom', seed });
 
@@ -100,5 +102,9 @@ for (let q = 0; q < years * 4 && !s.gameOver; q++) {
   }
 }
 console.log(rows.join('\n'));
+if (saveArg) {
+  const fs = require('node:fs') as { writeFileSync: (file: string, data: string) => void };
+  fs.writeFileSync(saveArg.slice('--save='.length), JSON.stringify(s));
+}
 console.log('gameOver', s.gameOver, 'achievements', s.achievements.join(','), 'titles', s.racing.titles, 'alive rivals', s.rivals.filter((r) => r.alive).length);
 if (!quiet) console.log(s.news.slice(0, 15).map((n) => `${E.dateLabel(n.q)} ${n.text}`).join('\n'));
