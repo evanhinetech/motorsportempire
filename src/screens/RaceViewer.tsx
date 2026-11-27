@@ -4,7 +4,8 @@
 // Everything is derived deterministically from the race, so a replay looks the same each time.
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import { LayoutChangeEvent, Pressable, Text, View } from 'react-native';
+import { LayoutChangeEvent, Pressable, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { TIERS } from '../engine/data';
 import type { GameState, RaceResult } from '../engine/types';
 import { LAPS, Track, buildTrack, distance, planRace, pointAt } from '../ui/raceReplay';
@@ -141,7 +142,7 @@ export default function RaceViewer({ s, race, onClose }: { s: GameState; race: R
       <Card style={{ gap: 6 }}>
         <Between>
           <Text style={[font.body, { fontWeight: '800' }]}>{s.company.logo} {live[me].r.e.driver}</Text>
-          <Text style={[font.num, { fontSize: 22, color: live[me].out ? '#FF6B6B' : me === 0 ? C.gold : C.text }]}>{live[me].out ? 'OUT' : `P${me + 1}`}</Text>
+          <Text style={[font.num, { fontSize: 22, color: live[me].out ? C.bad : me === 0 ? C.gold : C.text }]}>{live[me].out ? 'OUT' : `P${me + 1}`}</Text>
         </Between>
         {board.map(({ r, d, out }) => {
           const pos = live.findIndex((x) => x.r === r);
@@ -159,7 +160,7 @@ export default function RaceViewer({ s, race, onClose }: { s: GameState; race: R
       </Card>
 
       {done && (
-        <Card accent={finalPos === 0 ? C.gold : finalPos > 0 && finalPos < 3 ? C.green : finalPos < 0 ? '#FF6B6B' : undefined}>
+        <Card accent={finalPos === 0 ? C.gold : finalPos > 0 && finalPos < 3 ? C.green : finalPos < 0 ? C.bad : undefined}>
           <Text style={[font.body, { fontWeight: '800' }]}>
             {finalPos === 0 ? '🏆 Victory!' : finalPos > 0 && finalPos < 3 ? `🍾 Podium: P${finalPos + 1}` : finalPos < 0 ? 'Retired from the race' : `Finished P${finalPos + 1}`}
           </Text>

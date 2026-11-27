@@ -982,13 +982,16 @@ function updateRivals(s: GameState, rng: Rng, playerShareBySeg: Map<SegmentId, n
 
 const WORLD_EVENTS: Record<number, string> = {
   1979: '⛽ Oil crisis! Fuel prices soar and buyers want efficient cars.',
+  1985: 'The turbo era begins: digital dashboards, bold liveries and big power.',
   1987: 'Fuel prices settle. Power is back in fashion.',
   1990: '🔋 Battery breakthroughs make Electric Power research possible.',
   1992: 'Safety ratings now drive buying decisions. Luxury and safety matter more.',
   1995: '🇨🇳 China opens its car market to foreign brands.',
+  1997: 'The millennium era begins: chrome, gloss and the first in-car computers.',
   2000: 'The SUV boom is accelerating, especially in North America.',
   2008: '📉 Financial crisis: car demand falls sharply for two years.',
   2012: 'Early electric cars are winning over tech-savvy buyers.',
+  2015: 'The electric era begins: clean design, batteries and software-defined cars.',
   2020: '😷 A pandemic hits car demand this year.',
   2021: 'Europe confirms plans to phase out new petrol cars by 2035. China will follow.',
   2030: 'Electric cars now outsell petrol in many markets.',

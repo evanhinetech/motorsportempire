@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { ENGINEER_HIRE_FEE, ENGINEER_SALARY, LAB_COST_PER_ENGINEER, MAX_TECH, SEGMENTS, TECH_AREAS, TECH_INFO, techLevelCost } from '../engine/data';
 import { fireEngineers, hireEngineers, maxEngineers, money, researchPoints, setResearchFocus, setResearchSpending, yearOf } from '../engine/sim';
 import type { TechArea } from '../engine/types';
@@ -12,7 +13,7 @@ export default function ResearchScreen() {
   const year = yearOf(s.quarter);
 
   const unlocksFor = (a: TechArea) =>
-    SEGMENTS.filter((seg) => (seg.requires[a] ?? 0) === s.tech[a] + 1).map((seg) => `${seg.icon} ${seg.name}`);
+    SEGMENTS.filter((seg) => (seg.requires[a] ?? 0) === s.tech[a] + 1).map((seg) => seg.name);
 
   return (
     <Screen>
@@ -56,7 +57,7 @@ export default function ResearchScreen() {
           const unlocks = unlocksFor(a);
           return (
             <Pressable key={a} onPress={() => !locked && !maxed && act((g) => setResearchFocus(g, a))}>
-              <Card style={{ borderColor: active ? C.blue : C.line, backgroundColor: active ? '#111A27' : C.panel, opacity: locked ? 0.5 : 1 }}>
+              <Card style={{ borderColor: active ? C.blue : C.line, backgroundColor: active ? C.panel2 : C.panel, opacity: locked ? 0.5 : 1 }}>
                 <Between>
                   <Text style={[font.body, { fontWeight: '800' }]}>{info.name}</Text>
                   {active ? <Pill label="RESEARCHING" color={C.blue} /> : locked ? <Pill label={`OPENS ${info.unlockYear}`} /> : maxed ? <Pill label="MAXED" color={C.green} /> : null}

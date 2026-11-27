@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '../ui/Text';
 import { ACHIEVEMENTS, FACTORIES, PHILOSOPHIES, REGIONS, REGION_MAP } from '../engine/data';
 import {
   acquireRival, acquisitionPrice, acquisitionStatus, capacity, enterRegion, factoryUpkeep, loanLimit, marketingCost, money,
   regionStatus, repayLoan, setMarketing, upgradeFactory,
 } from '../engine/sim';
+import { theme } from '../ui/theme';
 import { useActiveGame } from '../state/GameContext';
 import { SalesSection } from './SalesReport';
 import { Bar, Between, Button, C, Card, Pill, Row, Screen, Section, Segmented, Stat, font } from '../ui/kit';
@@ -33,7 +35,7 @@ export default function EmpireScreen() {
 
       <Section title="Manufacturing">
         <Card>
-          <Text style={[font.body, { fontWeight: '800' }]}>🏭 {fac.name}</Text>
+          <Text style={[font.title, { fontSize: 18 }]}>{fac.name}</Text>
           <Row style={{ gap: 12 }}>
             <Stat small label="Capacity / qtr" value={capacity(s).toLocaleString()} />
             <Stat small label="Upkeep / qtr" value={money(factoryUpkeep(s))} />
@@ -82,7 +84,7 @@ export default function EmpireScreen() {
                 st.ok ? (
                   <Button small label={`Open dealerships · ${money(r.entryCost)}`} disabled={s.money < r.entryCost} onPress={() => act((g) => enterRegion(g, r.id))} />
                 ) : (
-                  <Text style={{ color: C.amber, fontSize: 13 }}>🔒 {st.reason}</Text>
+                  <Text style={{ color: C.amber, fontSize: 13 }}>Locked · {st.reason}</Text>
                 )
               )}
             </Card>
@@ -101,7 +103,7 @@ export default function EmpireScreen() {
                   <Text style={[font.body, { fontWeight: '800' }]}>{r.name}</Text>
                   <Text style={font.small}>{REGION_MAP[r.region].flag} {r.focus} · tech {r.tech.toFixed(1)}</Text>
                 </View>
-                {r.owned ? <Pill label="OWNED" color={C.gold} /> : !r.alive ? <Pill label="BANKRUPT" color="#FF6B6B" /> : r.wealth < -20 ? <Pill label="STRUGGLING" color={C.amber} /> : null}
+                {r.owned ? <Pill label="OWNED" color={C.gold} /> : !r.alive ? <Pill label="BANKRUPT" color={C.bad} /> : r.wealth < -20 ? <Pill label="STRUGGLING" color={C.amber} /> : null}
               </Between>
               <Between><Text style={font.small}>Prestige</Text><Text style={[font.num, { fontSize: 12 }]}>{r.prestige.toFixed(0)}</Text></Between>
               <Bar value={r.prestige} color={C.gold} height={4} />
@@ -136,7 +138,7 @@ export default function EmpireScreen() {
             const got = s.achievements.includes(a.id);
             return (
               <View key={a.id} style={{ flexDirection: 'row', gap: 10, opacity: got ? 1 : 0.4 }}>
-                <Text>{got ? '🏅' : '○'}</Text>
+                <View style={{ width: 14, height: 14, marginTop: 3, borderRadius: theme().radius <= 4 ? 0 : 7, backgroundColor: got ? C.gold : 'transparent', borderWidth: 2, borderColor: got ? C.gold : C.faint }} />
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: C.text, fontWeight: '700' }}>{a.name}</Text>
                   <Text style={[font.small, { fontSize: 12 }]}>{a.desc}</Text>
