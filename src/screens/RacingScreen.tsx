@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from '../ui/Text';
 import { TIERS, TRAIT_INFO } from '../engine/data';
 import {
   acceptSponsor, chooseSeries, currentDriver, money, objectiveText, quarterOf, raceCarRating, raceDevCost, releaseDriver,
@@ -169,7 +170,7 @@ function SeasonCard() {
               return (
                 <Pressable key={rr.round} onPress={() => setWatching(rr.round)} style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 8, opacity: pressed ? 0.6 : 1 })}>
                   <Text style={[font.small, { flex: 1 }]}>R{rr.round} {rr.name}{rr.wet ? ' 🌧️' : ''}</Text>
-                  <Text style={{ color: p === 0 ? C.gold : p > 0 && p < 3 ? C.green : p < 0 ? '#FF6B6B' : C.text, fontWeight: '800' }}>{p < 0 ? 'DNF' : `P${p + 1}`}</Text>
+                  <Text style={{ color: p === 0 ? C.gold : p > 0 && p < 3 ? C.green : p < 0 ? C.bad : C.text, fontWeight: '800' }}>{p < 0 ? 'DNF' : `P${p + 1}`}</Text>
                   <Text style={{ color: C.blue, fontWeight: '700', fontSize: 13 }}>▶ Watch</Text>
                 </Pressable>
               );
@@ -189,7 +190,7 @@ function LadderRow({ label, sub, on, locked, current, onPress }: { label: string
         {on && <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: C.red }} />}
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={{ color: C.text, fontWeight: '700' }}>{label}{locked ? ' 🔒' : ''}</Text>
+        <Text style={{ color: C.text, fontWeight: '700' }}>{label}{locked ? ' · locked' : ''}</Text>
         <Text style={[font.small, { fontSize: 12 }]}>{sub}</Text>
       </View>
       {current && <Pill label="NOW" color={C.amber} />}
@@ -239,7 +240,7 @@ function DriverMarket({ onClose }: { onClose: () => void }) {
             {ok ? (
               <Button small kind="primary" label={`Sign · ${money(d.salary * 2)} fee`} onPress={() => { if (act((g) => signDriver(g, d.id))) onClose(); }} />
             ) : (
-              <Text style={{ color: C.amber, fontSize: 13 }}>🔒 Needs {d.minPrestige} prestige</Text>
+              <Text style={{ color: C.amber, fontSize: 13 }}>Needs {d.minPrestige} prestige</Text>
             )}
           </Card>
         );

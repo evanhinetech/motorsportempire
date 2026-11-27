@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { View } from 'react-native';
+import { Text, TextInput } from '../ui/Text';
 import { REGION_MAP, SEGMENTS, SEGMENT_MAP, STAT_KEYS, STAT_LABELS } from '../engine/data';
 import {
   DesignDraft, cancelDesign, carTitle, electricAvailable, money, price as fmtPrice, previewDesign, retireCar, roundPrice,
   segmentStatus, setCarPrice, startDesign, statCaps, suggestedPrice,
 } from '../engine/sim';
 import type { CarModel, Powertrain, RegionId, SegmentId, Stats } from '../engine/types';
+import { CarArt } from '../ui/icons';
 import { useActiveGame } from '../state/GameContext';
 import { Bar, Between, Button, C, Card, Chip, Pill, Row, Screen, Section, Segmented, Sheet, Slider, Stat, font } from '../ui/kit';
 
@@ -26,7 +28,7 @@ export default function CarsScreen() {
           {dev.map((c) => (
             <Card key={c.id} accent={C.blue}>
               <Between>
-                <Text style={[font.body, { fontWeight: '800' }]}>{SEGMENT_MAP[c.segment].icon} {carTitle(c)}</Text>
+                <Row style={{ flex: 1, flexWrap: 'nowrap', gap: 10 }}><CarArt segment={c.segment} color={s.company.color} glass={C.panel2} tyre={C.text} outline={C.text} width={64} /><Text style={[font.title, { fontSize: 18, flex: 1 }]} numberOfLines={1}>{carTitle(c)}</Text></Row>
                 <Pill label={`${c.devQuartersLeft} QTR${c.devQuartersLeft > 1 ? 'S' : ''} LEFT`} color={C.blue} />
               </Between>
               <Text style={font.small}>{SEGMENT_MAP[c.segment].name} · launches at {fmtPrice(c.price)}</Text>
@@ -51,7 +53,7 @@ export default function CarsScreen() {
           {showRetired && retired.slice().reverse().map((c) => (
             <Card key={c.id}>
               <Between>
-                <Text style={font.body}>{carTitle(c)}{c.legendary ? ' 🌟' : ''}</Text>
+                <Text style={font.body}>{carTitle(c)}{c.legendary ? ' ★' : ''}</Text>
                 <Text style={font.small}>{c.unitsSold.toLocaleString()} sold</Text>
               </Between>
               <Text style={font.small}>Lifetime profit {money(c.profit)}</Text>
@@ -91,7 +93,7 @@ function CarCard({ car, onNextGen }: { car: CarModel; onNextGen: () => void }) {
     <Card accent={car.legendary ? C.gold : undefined}>
       <Between>
         <View style={{ flex: 1 }}>
-          <Text style={[font.body, { fontWeight: '800', fontSize: 17 }]}>{def.icon} {carTitle(car)}</Text>
+          <Row style={{ flexWrap: 'nowrap', gap: 10 }}><CarArt segment={car.segment} color={s.company.color} glass={C.panel2} tyre={C.text} outline={C.text} width={64} /><Text style={[font.title, { fontSize: 19, flex: 1 }]} numberOfLines={1}>{carTitle(car)}</Text></Row>
           <Text style={font.small}>{def.name} · on sale {Math.floor(car.quartersInProduction / 4)}y {car.quartersInProduction % 4}q</Text>
         </View>
         <View style={{ alignItems: 'flex-end', gap: 4 }}>
@@ -101,8 +103,8 @@ function CarCard({ car, onNextGen }: { car: CarModel; onNextGen: () => void }) {
       </Between>
       <Row style={{ gap: 12 }}>
         <Stat small label="Sold last qtr" value={car.unitsLastQuarter.toLocaleString()} />
-        <Stat small label="Margin / car" value={fmtPrice(margin)} color={margin > 0 ? C.green : '#FF6B6B'} />
-        <Stat small label="Lifetime profit" value={money(car.profit)} color={car.profit >= 0 ? C.green : '#FF6B6B'} />
+        <Stat small label="Margin / car" value={fmtPrice(margin)} color={margin > 0 ? C.green : C.bad} />
+        <Stat small label="Lifetime profit" value={money(car.profit)} color={car.profit >= 0 ? C.green : C.bad} />
       </Row>
       {Object.keys(car.salesByRegion).length > 1 && (
         <Text style={font.small}>
@@ -173,11 +175,11 @@ function Designer({ lineOf, onClose }: { lineOf?: CarModel; onClose: () => void 
           <Row>
             {SEGMENTS.map((x) => {
               const st = segmentStatus(s, x.id);
-              return <Chip key={x.id} label={`${x.icon} ${x.name}${st.ok ? '' : ' 🔒'}`} on={segment === x.id} disabled={!st.ok} onPress={() => pickSegment(x.id)} />;
+              return <Chip key={x.id} label={`${x.name}${st.ok ? '' : ' (locked)'}`} on={segment === x.id} disabled={!st.ok} onPress={() => pickSegment(x.id)} />;
             })}
           </Row>
           {SEGMENTS.filter((x) => !segmentStatus(s, x.id).ok).slice(0, 3).map((x) => (
-            <Text key={x.id} style={font.small}>🔒 {x.name}: {segmentStatus(s, x.id).reason}</Text>
+            <Text key={x.id} style={font.small}>Locked · {x.name}: {segmentStatus(s, x.id).reason}</Text>
           ))}
         </Section>
       )}
@@ -237,11 +239,11 @@ function Designer({ lineOf, onClose }: { lineOf?: CarModel; onClose: () => void 
         <Card>
           <Row style={{ gap: 12 }}>
             <Stat small label="Build cost" value={fmtPrice(preview.unitCost)} />
-            <Stat small label="Margin / car" value={fmtPrice(preview.margin)} color={preview.margin > 0 ? C.green : '#FF6B6B'} />
+            <Stat small label="Margin / car" value={fmtPrice(preview.margin)} color={preview.margin > 0 ? C.green : C.bad} />
           </Row>
           <Row style={{ gap: 12 }}>
             <Stat small label="Demand / qtr" value={preview.demand.toLocaleString()} />
-            <Stat small label="Est. profit / qtr" value={money(preview.expectedProfit)} color={preview.expectedProfit > 0 ? C.green : '#FF6B6B'} />
+            <Stat small label="Est. profit / qtr" value={money(preview.expectedProfit)} color={preview.expectedProfit > 0 ? C.green : C.bad} />
           </Row>
           <Text style={font.small}>
             Buyer rating: {(Object.entries(preview.quality) as [RegionId, number][]).map(([r, q]) => `${REGION_MAP[r].flag} ${q}/100`).join('  ')}
@@ -249,7 +251,7 @@ function Designer({ lineOf, onClose }: { lineOf?: CarModel; onClose: () => void 
           {preview.demand > preview.expectedUnits * 1.2 && (
             <Text style={{ color: C.amber, fontSize: 13 }}>Demand is higher than your factory can build. You could raise the price.</Text>
           )}
-          {preview.demand < 20 && <Text style={{ color: '#FF6B6B', fontSize: 13 }}>Very few buyers at this price. Try lowering it or improving the car.</Text>}
+          {preview.demand < 20 && <Text style={{ color: C.bad, fontSize: 13 }}>Very few buyers at this price. Try lowering it or improving the car.</Text>}
         </Card>
       </Section>
 

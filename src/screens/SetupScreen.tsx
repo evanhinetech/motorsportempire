@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text, TextInput } from '../ui/Text';
 import { BRAND_COLORS, COUNTRIES, LOGOS, PHILOSOPHIES, START_YEAR } from '../engine/data';
 import { newGame } from '../engine/sim';
 import type { Philosophy } from '../engine/types';
@@ -19,8 +20,13 @@ export default function SetupScreen() {
   return (
     <Screen>
       <View style={{ paddingTop: 12, gap: 6 }}>
-        <Text style={{ color: C.red, fontWeight: '900', letterSpacing: 3, fontSize: 12 }}>EST. {START_YEAR} · A GARAGE, A DREAM</Text>
-        <Text style={{ color: C.text, fontWeight: '900', fontSize: 34, letterSpacing: -1, lineHeight: 36 }}>MOTORSPORT{'\n'}EMPIRE</Text>
+        <View style={{ gap: 0, marginBottom: 6 }}>
+          <View style={{ height: 6, backgroundColor: '#E2702A' }} />
+          <View style={{ height: 6, backgroundColor: '#E8B13A' }} />
+          <View style={{ height: 6, backgroundColor: '#6B3A1E' }} />
+        </View>
+        <Text style={{ color: C.dim, fontWeight: '700', fontSize: 13 }}>Est. {START_YEAR} · a garage and a dream</Text>
+        <Text style={{ fontFamily: 'display', color: C.text, fontSize: 44, lineHeight: 46 }}>Motorsport{'\n'}Empire</Text>
         <Text style={[font.small, { fontSize: 15, marginTop: 4 }]}>
           Build cars. Win races. Grow a small workshop into the greatest automotive brand in history.
         </Text>
@@ -65,7 +71,7 @@ export default function SetupScreen() {
           const on = p === philosophy;
           return (
             <Pressable key={p} onPress={() => setPhilosophy(p)}>
-              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderColor: on ? C.red : C.line, backgroundColor: on ? '#1F1214' : C.panel }}>
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderColor: on ? C.red : C.line, backgroundColor: on ? C.panel2 : C.panel }}>
                 <Text style={{ fontSize: 24 }}>{info.icon}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: C.text, fontWeight: '800', fontSize: 16 }}>{info.name}</Text>
